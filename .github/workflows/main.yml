@@ -61,7 +61,7 @@ jobs:
       - name: Update Deployment Image
         if: success()
         run: |
-          sed -i "s|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/flask_app_asgmt:${{ env.TIMESTAMP }}|g" deployment.yaml
+          sed -i "s|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/flask_app_asgmt:${{ env.TIMESTAMP }}|g" k8s/deployment.yaml
 
       # Step 9: Deploy the updated deployment.yaml to AKS
       - name: Deploy to AKS
