@@ -63,8 +63,32 @@ jobs:
         run: |
           sed -i "s|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/flask_app_asgmt:${{ env.TIMESTAMP }}|g" k8s/deployment.yaml
 
-      # Step 9: Deploy the updated deployment.yaml to AKS
+      # Step 9: Deploy to AKS
       - name: Deploy to AKS
         if: success()
         run: |
           kubectl apply -f k8s/deployment.yaml
+
+      # Step 10: Slack Notification on Success
+      - name: Slack Notification - Success
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": ":rocket: *Deployment Succeeded!* :white_check_mark:\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nWorkflow: ${{ github.workflow }}\nJob: ${{ github.job }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      # Step 11: Slack Notification on Failure
+      - name: Slack Notification - Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": ":x: *Deployment Failed!* :bangbang:\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nWorkflow: ${{ github.workflow }}\nJob: ${{ github.job }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
