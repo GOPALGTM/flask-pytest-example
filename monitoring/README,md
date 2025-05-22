@@ -1,0 +1,44 @@
+# 📘 Official Documentation
+For detailed information, configurations, and advanced setups, refer to the official kube-prometheus-stack Helm chart README:
+
+👉 kube-prometheus-stack Helm Chart README
+
+README
+
+## 🚀 Quick Start Guide
+### 1. Prerequisites
+
+Helm installed on your local machine.
+
+### 2. Add the Prometheus Community Helm Repository
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+### 3. Create a Namespace for Monitoring
+
+kubectl create namespace monitoring
+### 4. Install the kube-prometheus-stack
+
+helm install prom prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --values values-prom.yaml
+
+### 5. And then we can go ahead and install Promtail:
+
+helm upgrade --install promtail grafana/promtail -f values-promtail.yaml -n monitoring
+
+### 6. And lastly, we can install Loki inside of our Kubernetes cluster:
+
+helm upgrade --install loki grafana/loki-distributed -n monitoring
+
+### 7. The following kubectl command will show us the different components that are running as part of Loki:
+
+kubectl get all -n monitoring
+
+### 8. Login to Grafana
+
+Open your browser and navigate to http://<LoadBalacer>.
+
+Username: admin
+Password: devtool

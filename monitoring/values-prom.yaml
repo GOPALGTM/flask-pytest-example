@@ -1,0 +1,54 @@
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+
+grafana:
+  enabled: true
+  adminPassword: "devtool"
+  sidecar:
+    datasources:
+      defaultDatasourceEnabled: true
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki-loki-distributed-query-frontend.monitoring:3100
+  service:
+    type: LoadBalancer
+    port: 80
+
+
+alertmanager:
+  config:
+    route:
+      receiver: "null"
+      routes:
+        - matchers:
+            - alertname = "Watchdog"
+          receiver: "slack"
+        - matchers:
+            - alertname = "PodDown"
+          receiver: "slack"
+    receivers:
+      - name: "null"
+      - name: "slack"
+        slack_configs:
+          - api_url: "https://hooks.slack.com/services/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"
+            channel: "#prometheus-alerts"
+            send_resolved: true
+
+additionalPrometheusRulesMap:
+  custom-app-alerts:
+    groups:
+      - name: development-instance-down
+        rules:
+          - alert: PodDown
+            expr: kube_pod_container_status_ready{namespace="development"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Pod {{ $labels.pod }} is down"
+              description: "The pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been down for more than 1 minute."
+                                                                                                                                                                                                                                            
